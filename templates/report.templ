@@ -1,0 +1,91 @@
+package templates
+
+import "fmt"
+import "math"
+
+const RMS_BASELINE float64 = -20.5
+const RMS_FLOOR float64 = -60.0
+const RMS_MIN float64 = RMS_BASELINE - 2.5
+const RMS_MAX float64 = RMS_BASELINE + 2.5
+const PEAK_LEVEL float64 = -3.0
+
+templ Report(filePath string, rms float64, rmsFloor float64) {
+	<div>
+        <h2>Report for file {filePath}</h2>
+        <table>
+            <th style={cellStyle("left", "150px")}>Field</th>
+            <th style={cellStyle("left", "120px")}>Value</th>
+            <th style={cellStyle("right", "150px")}>Expected value</th>
+            <th style={cellStyle("right", "150px")}>Notes</th>
+            @getRmsRow(rms)
+            @getRmsFloorRow(rmsFloor)
+        </table>
+    </div>
+}
+
+templ getRmsRow(rms float64) {
+    if rms > RMS_MAX || rms < RMS_MIN {
+        <tr style={getErrorRowFormat()}>
+            <td style="text-align: left; min-width: 150px;">RMS</td>
+            <td>{num(rms)} dB</td>
+            <td style="text-align: right; min-width: 150px;">{RMS_BASELINE} +/- 2.5 dB</td>
+            <td style="text-align: right; min-width: 150px;">Reduce RMS by at least {num(math.Abs(RMS_MAX - rms))}</td>
+        </tr>
+    } else if rms < RMS_MIN {
+        <tr style={getErrorRowFormat()}>
+            <td style="text-align: left; min-width: 150px;">RMS</td>
+            <td>{num(rms)} dB</td>
+            <td style="text-align: right; min-width: 150px;">{RMS_BASELINE} +/- 2.5 dB</td>
+            <td style="text-align: right; min-width: 150px;">Increase RMS by at least {num(math.Abs(RMS_MIN - rms))}</td>
+        </tr>
+    } else {
+        <tr>
+            <td style="text-align: left; min-width: 150px;">RMS</td>
+            <td>{num(rms)} dB</td>
+            <td style="text-align: right; min-width: 150px;">{RMS_BASELINE} +/- 2.5 dB</td>
+        </tr>
+    }
+}
+
+templ getRmsFloorRow(rmsFloor float64) {
+    if rmsFloor > RMS_FLOOR {
+        @reportRow(
+            "RMS floor",
+            num(rmsFloor),
+            num(RMS_FLOOR),
+            fmt.Sprintf("Decrease RMS floor by at least %s", num(math.Abs(RMS_FLOOR - rmsFloor))),
+            getErrorRowFormat(),
+        )
+    } else {
+        @reportRow(
+            "RMS floor",
+            num(rmsFloor),
+            num(RMS_FLOOR),
+            "",
+            "",
+        )
+    }
+}
+
+templ reportRow(field string, value string, expected string, notes string, style string) {
+    <tr style={style}>
+        <td style={cellStyle("left", "150px")}>{field}</td>
+        <td style={cellStyle("left", "120px")}>{value}</td>
+        <td style={cellStyle("right", "150px")}>{expected}</td>
+        if notes != "" {
+            <td style={cellStyle("right", "150px")}>{notes}</td>
+        }
+    </tr>
+}
+
+func getErrorRowFormat() string {
+    return "background-color: #fa9696; border: 1px solid #fd5050;"
+}
+
+func cellStyle(align string, minWidth string) string {
+    return fmt.Sprintf("text-align: %s; min-width: %s;", align, minWidth)
+}
+
+func num(val float64) string {
+    return fmt.Sprintf("%.2f dB", val)
+}
