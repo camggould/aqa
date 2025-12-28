@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -19,6 +20,8 @@ type Mp3 struct {
 	filePath string
 	samples []float64
 	sampleRate int
+	rms float64
+	peak float64
 }
 
 const HANN_RMS = 0.6123724356957945
@@ -47,10 +50,18 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
 		return nil, fmt.Errorf("Unable to parse sample rate [%s]. %w", sampleRate, err)
 	}
 
+	rms, peak, err := parseAudioLevels(filePath)
+
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse rms or peak for file [%s]. %w", filePath, err)
+	}
+
 	mp3 := Mp3 {
 		filePath: filePath,
 		samples: samples,
 		sampleRate: sampleRateAsInt,
+		rms: rms,
+		peak: peak,
 	}
 
 	return &mp3, nil
@@ -63,31 +74,7 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
  * of the entire audio. Each window that is evaluated includes DC removal and Hann smoothing.
 */
 func (mp3 *Mp3) GetOverallRMS() float64 {
-	frameSize := int(0.5 * float64(mp3.sampleRate))
-	hopSize := int(0.01 * float64(mp3.sampleRate))
-
-	var sumRMSdB float64
-	var count int
-
-	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
-		frame := make([]float64, frameSize)
-		copy(frame, mp3.samples[i:i+frameSize])
-
-		windowed := applyHannWindow(frame)
-		rms := rmsFrame(windowed)
-
-		if rms > 0 {
-			rmsDB := 20 * math.Log10(rms)
-			sumRMSdB += rmsDB
-			count++
-		}
-	}
-
-	if count == 0 {
-		return math.Inf(-1)
-	}
-
-	return sumRMSdB / float64(count)
+	return mp3.rms
 }
 
 /** Calculates RMS floor
@@ -135,6 +122,13 @@ func (mp3 *Mp3) GetRMSCeiling() float64 {
 	}
 
 	return rmsToDBFS(maxRMS)
+}
+
+/* Returns peak level of audio.
+ * This leverages ffmpeg max_volume to retrieve the peak.
+ */
+func (mp3 *Mp3) GetPeakDBFS() float64 {
+	return mp3.peak
 }
 
 func applyHannWindow(samples []float64) []float64 {
@@ -229,6 +223,31 @@ func parseSampleRate(sr string) (int, error) {
 	}
 
 	return value, nil
+}
+
+func parseAudioLevels(filePath string) (meanDB float64, maxDB float64, err error) {
+	var stderr bytes.Buffer
+
+	err = ffmpeg.Input(filePath).
+		Output("pipe:", ffmpeg.KwArgs{
+			"af": "volumedetect",
+			"f":  "null",
+		}).
+		WithOutput(nil, &stderr).
+		Run()
+	if err != nil {
+		return
+	}
+
+	log := stderr.String()
+
+	reMean := regexp.MustCompile(`mean_volume: ([\-\d\.]+) dB`)
+	reMax  := regexp.MustCompile(`max_volume: ([\-\d\.]+) dB`)
+
+	meanDB, _ = strconv.ParseFloat(reMean.FindStringSubmatch(log)[1], 64)
+	maxDB, _  = strconv.ParseFloat(reMax.FindStringSubmatch(log)[1], 64)
+
+	return
 }
 
 func rmsToDBFS(rms float64) float64 {
