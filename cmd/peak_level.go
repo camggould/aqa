@@ -15,10 +15,11 @@ var peakLevelCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		mp3File, err := cmd.Flags().GetString("mp3")
 
-		if err != nil {
+		if err != nil || mp3File == "" {
 			fmt.Printf("Failed to read mp3 flag: %s\n", err)
 			return
 		}
+
 		rms, err := GetPeakLevel(mp3File)
 
 		if err != nil {
