@@ -111,6 +111,32 @@ func (mp3 *Mp3) GetRmsFloor() float64 {
 	return rmsToDBFS(minRMS)
 }
 
+/** Calculates RMS ceiling
+ * RMS ceiling is calculated by sliding across 0.5s windows of the audio (0.1s hops)
+ * and calculating the RMS of that window. The maximum RMS window is tracked and converted
+ * to decibles at the end. Each window that is evaluated includes DC removal and Hann smoothing.
+*/
+func (mp3 *Mp3) GetRMSCeiling() float64 {
+	frameSize := int(0.5 * float64(mp3.sampleRate))
+	hopSize := int(0.01 * float64(mp3.sampleRate))
+
+	maxRMS := math.Inf(-1)
+
+	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
+		frame := make([]float64, frameSize)
+		copy(frame, mp3.samples[i:i+frameSize])
+
+		windowed := applyHannWindow(frame)
+		rms := rmsFrame(windowed)
+
+		if rms > maxRMS {
+			maxRMS = rms
+		}
+	}
+
+	return rmsToDBFS(maxRMS)
+}
+
 func applyHannWindow(samples []float64) []float64 {
 	n := len(samples)
 	out := make([]float64, n)
