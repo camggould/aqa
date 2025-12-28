@@ -185,7 +185,8 @@ func decodeToPCM(filePath string, sampleRate string) ([]float64, error) {
 			"f": "f32le",
 			"ac": 1,
 			"ar": sampleRate,
-		})
+		}).
+		Silent(true)
 
 	var out bytes.Buffer
 
@@ -231,6 +232,7 @@ func parseAudioLevels(filePath string) (meanDB float64, maxDB float64, err error
 			"f":  "null",
 		}).
 		WithOutput(nil, &stderr).
+		Silent(true).
 		Run()
 	if err != nil {
 		return
