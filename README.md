@@ -11,3 +11,11 @@ Clone the repo to start using aqa. Sample commands:
 ## Supported audio formats
 
 Currently the only supported audio format is MP3.
+
+## Contributing
+
+Feel free to put out a PR for review if you'd like to add additional tools.
+
+## About the tool
+
+I am a former developer for ACX.com. I enjoyed the space and learned a lot about audio along the way. This is a hobby project to bring more tooling to the space over time. The tool itself utilizes ffmpeg-go and go-ffprobe under the hood for interfacing with audio files.
