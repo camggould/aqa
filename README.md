@@ -6,6 +6,7 @@ AQA (pronounced "aqua") is a command line utility for evaluating the quality of 
 
 Clone the repo to start using aqa. Sample commands:
 
+`aqa rms /path/to/my/mp3` returns the RMS for the MP3 file.
 `aqa rmsFloor /path/to/my/mp3` returns the RMS floor of the audio file.
 
 ## Supported audio formats
