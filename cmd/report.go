@@ -36,7 +36,6 @@ var reportCmd = &cobra.Command{
 }
 
 func init() {
-	reportCmd.Flags().String("mp3", "example.mp3", "the mp3 file to analyze.")
 	reportCmd.Flags().String("o", "example.html", "the html file to output a report to. Default is 'report.html'.")
 	rootCmd.AddCommand(reportCmd)
 }

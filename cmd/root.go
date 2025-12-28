@@ -22,3 +22,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
+
+func init() {
+	rootCmd.PersistentFlags().String("mp3", "", "the mp3 file to analyze.")
+}
