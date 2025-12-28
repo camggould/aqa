@@ -25,25 +25,21 @@ templ Report(filePath string, rms float64, rmsFloor float64) {
 
 templ getRmsRow(rms float64) {
     if rms > RMS_MAX || rms < RMS_MIN {
-        <tr style={getErrorRowFormat()}>
-            <td style="text-align: left; min-width: 150px;">RMS</td>
-            <td>{num(rms)} dB</td>
-            <td style="text-align: right; min-width: 150px;">{RMS_BASELINE} +/- 2.5 dB</td>
-            <td style="text-align: right; min-width: 150px;">Reduce RMS by at least {num(math.Abs(RMS_MAX - rms))}</td>
-        </tr>
-    } else if rms < RMS_MIN {
-        <tr style={getErrorRowFormat()}>
-            <td style="text-align: left; min-width: 150px;">RMS</td>
-            <td>{num(rms)} dB</td>
-            <td style="text-align: right; min-width: 150px;">{RMS_BASELINE} +/- 2.5 dB</td>
-            <td style="text-align: right; min-width: 150px;">Increase RMS by at least {num(math.Abs(RMS_MIN - rms))}</td>
-        </tr>
+        @reportRow(
+            "RMS",
+            num(rms),
+            fmt.Sprintf("%.2f +/- 2.5 dB", RMS_BASELINE),
+            getRmsErrorMessage(rms),
+            getErrorRowFormat(),
+        )
     } else {
-        <tr>
-            <td style="text-align: left; min-width: 150px;">RMS</td>
-            <td>{num(rms)} dB</td>
-            <td style="text-align: right; min-width: 150px;">{RMS_BASELINE} +/- 2.5 dB</td>
-        </tr>
+        @reportRow(
+            "RMS",
+            num(rms),
+            fmt.Sprintf("%.2f +/- 2.5 dB", RMS_BASELINE),
+            "",
+            "",
+        )
     }
 }
 
@@ -76,6 +72,14 @@ templ reportRow(field string, value string, expected string, notes string, style
             <td style={cellStyle("right", "150px")}>{notes}</td>
         }
     </tr>
+}
+
+func getRmsErrorMessage(rms float64) string {
+    if rms > RMS_MAX {
+        return fmt.Sprintf("Reduce RMS by at least %s", num(math.Abs(RMS_MAX - rms)))
+    } else {
+        return fmt.Sprintf("Increase RMS by at least %s", num(math.Abs(RMS_MIN - rms)))
+    }
 }
 
 func getErrorRowFormat() string {
