@@ -9,7 +9,7 @@ const RMS_MIN float64 = RMS_BASELINE - 2.5
 const RMS_MAX float64 = RMS_BASELINE + 2.5
 const PEAK_LEVEL float64 = -3.0
 
-templ Report(filePath string, rms float64, rmsFloor float64) {
+templ Report(filePath string, rms float64, rmsFloor float64, peakLevel float64) {
 	<div>
         <h2>Report for file {filePath}</h2>
         <table>
@@ -19,6 +19,7 @@ templ Report(filePath string, rms float64, rmsFloor float64) {
             <th style={cellStyle("right", "150px")}>Notes</th>
             @getRmsRow(rms)
             @getRmsFloorRow(rmsFloor)
+            @getPeakLevelRow(peakLevel)
         </table>
     </div>
 }
@@ -37,6 +38,26 @@ templ getRmsRow(rms float64) {
             "RMS",
             num(rms),
             fmt.Sprintf("%.2f +/- 2.5 dB", RMS_BASELINE),
+            "",
+            "",
+        )
+    }
+}
+
+templ getPeakLevelRow(peakLevel float64) {
+    if peakLevel > PEAK_LEVEL {
+        @reportRow(
+            "Peak Level",
+            num(peakLevel),
+            num(PEAK_LEVEL),
+            fmt.Sprintf("Reduce peak level by %s", num(math.Abs(PEAK_LEVEL - peakLevel))),
+            getErrorRowFormat(),
+        )
+    } else {
+        @reportRow(
+            "Peak Level",
+            num(peakLevel),
+            num(PEAK_LEVEL),
             "",
             "",
         )
