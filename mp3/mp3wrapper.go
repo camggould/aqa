@@ -24,7 +24,6 @@ type Mp3 struct {
 const HANN_RMS = 0.6123724356957945
 
 func (*Mp3) New(filePath string) (*Mp3, error) {
-
 	err := validation.IsMP3(filePath)
 	if err != nil {
 		return nil, err
@@ -55,12 +54,50 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
 	}
 
 	return &mp3, nil
-
 }
 
+/** Calculates overall RMS
+ * Overall RMS is calculated by sliding across 0.5s windows of the audio (0.1s hops)
+ * and calculating the RMS of that window. The RMS is converted to decibles.
+ * After sliding over all of the content, the decibles are averaged to get the RMS (in dB)
+ * of the entire audio. Each window that is evaluated includes DC removal and Hann smoothing.
+*/
+func (mp3 *Mp3) GetOverallRMS() float64 {
+	frameSize := int(0.5 * float64(mp3.sampleRate))
+	hopSize := int(0.01 * float64(mp3.sampleRate))
+
+	var sumRMSdB float64
+	var count int
+
+	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
+		frame := make([]float64, frameSize)
+		copy(frame, mp3.samples[i:i+frameSize])
+
+		windowed := applyHannWindow(frame)
+		rms := rmsFrame(windowed)
+
+		if rms > 0 {
+			rmsDB := 20 * math.Log10(rms)
+			sumRMSdB += rmsDB
+			count++
+		}
+	}
+
+	if count == 0 {
+		return math.Inf(-1)
+	}
+
+	return sumRMSdB / float64(count)
+}
+
+/** Calculates RMS floor
+ * RMS floor is calculated by sliding across 0.5s windows of the audio (0.1s hops)
+ * and calculating the RMS of that window. The minimum RMS window is tracked and converted
+ * to decibles at the end. Each window that is evaluated includes DC removal and Hann smoothing.
+*/
 func (mp3 *Mp3) GetRmsFloor() float64 {
 	frameSize := int(0.5 * float64(mp3.sampleRate))
-	hopSize := int(0.01 * float64(mp3.sampleRate)) // e.g., 10 ms hop
+	hopSize := int(0.01 * float64(mp3.sampleRate))
 
 	minRMS := math.Inf(1)
 	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
@@ -71,7 +108,7 @@ func (mp3 *Mp3) GetRmsFloor() float64 {
 		}
 	}
 
-    return rmsToDBFS(minRMS)
+	return rmsToDBFS(minRMS)
 }
 
 func applyHannWindow(samples []float64) []float64 {
@@ -87,18 +124,18 @@ func applyHannWindow(samples []float64) []float64 {
 }
 
 func rmsFrame(samples []float64) float64 {
-    var sum float64
-    for _, v := range samples {
-        sum += v
-    }
-    mean := sum / float64(len(samples))
+	var sum float64
+	var sq float64
+	for _, v := range samples {
+		sum += v
+	}
+	mean := sum / float64(len(samples))
 
-    var sq float64
-    for _, v := range samples {
-        x := v - mean
-        sq += x * x
-    }
-    return math.Sqrt(sq / float64(len(samples)))
+	for _, v := range samples {
+		x := v - mean
+		sq += x * x
+	}
+	return math.Sqrt(sq / float64(len(samples)))
 }
 
 func detectSampleRate(path string) (string, error) {
@@ -161,7 +198,6 @@ func parseSampleRate(sr string) (int, error) {
 		return 0, fmt.Errorf("invalid sample rate %q: %w", sr, err)
 	}
 
-	// Defensive validation — realistic audio ranges
 	if value < 8000 || value > 384000 {
 		return 0, fmt.Errorf("unreasonable sample rate: %d", value)
 	}
