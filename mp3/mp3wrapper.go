@@ -21,6 +21,8 @@ type Mp3 struct {
 	sampleRate int
 }
 
+const HANN_RMS = 0.6123724356957945
+
 func (*Mp3) New(filePath string) (*Mp3, error) {
 
 	err := validation.IsMP3(filePath)
@@ -58,27 +60,45 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
 
 func (mp3 *Mp3) GetRmsFloor() float64 {
 	frameSize := int(0.5 * float64(mp3.sampleRate))
-    hopSize := frameSize
+	hopSize := int(0.01 * float64(mp3.sampleRate)) // e.g., 10 ms hop
 
-    minRMS := math.Inf(1)
-
-    for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
-        rms := rmsFrame(mp3.samples[i : i+frameSize])
-        if rms < minRMS {
-            minRMS = rms
-        }
-    }
+	minRMS := math.Inf(1)
+	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
+		windowed := applyHannWindow(mp3.samples[i : i+frameSize])
+		rms := rmsFrame(windowed)
+		if rms < minRMS {
+			minRMS = rms
+		}
+	}
 
     return rmsToDBFS(minRMS)
 }
 
-func rmsFrame(samples []float64) float64 {
-	var sum float64
-	for _, v := range samples {
-		sum += v * v
+func applyHannWindow(samples []float64) []float64 {
+	n := len(samples)
+	out := make([]float64, n)
+
+	for i := 0; i < n; i++ {
+		w := 0.5 * (1 - math.Cos(2*math.Pi*float64(i)/float64(n-1)))
+		out[i] = samples[i] * (w / HANN_RMS)
 	}
 
-	return math.Sqrt(sum / float64(len(samples)))
+	return out
+}
+
+func rmsFrame(samples []float64) float64 {
+    var sum float64
+    for _, v := range samples {
+        sum += v
+    }
+    mean := sum / float64(len(samples))
+
+    var sq float64
+    for _, v := range samples {
+        x := v - mean
+        sq += x * x
+    }
+    return math.Sqrt(sq / float64(len(samples)))
 }
 
 func detectSampleRate(path string) (string, error) {
