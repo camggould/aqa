@@ -14,7 +14,7 @@ var rmsCeilingCmd = &cobra.Command{
 	Long: "Get the RMS ceiling of a provided mp3 file. Must be a valid MP3. Calculated based on the loudest 0.5s segment of audio.",
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		rmsFloor, err := GetRmsFloor(args[0])
+		rmsFloor, err := GetRmsCeiling(args[0])
 
 		if err != nil {
 			fmt.Printf("RMS ceiling could not be calculated due to error: %s\n", err)
