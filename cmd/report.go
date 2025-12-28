@@ -14,10 +14,10 @@ import (
 var reportCmd = &cobra.Command{
 	Use: "report",
 	Short: "Generate an HTML report of audio quality for the provided MP3.",
-	Long: "Generate an HTML report of audio quality for the provided MP3.",
-	Args: cobra.ExactArgs(1),
+	Long: "Generate an HTML report of audio quality for the provided MP3. The first argument is the input MP3 file, and the second argument is an optional output file location for the report.",
+	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		reportPath, err := GenerateReport(args[0])
+		reportPath, err := GenerateReport(args[0], args[1])
 
 		if err != nil {
 			fmt.Printf("Report could not be generated due to error: %s\n", err)
@@ -32,7 +32,7 @@ func init() {
 	rootCmd.AddCommand(reportCmd)
 }
 
-func GenerateReport(filePath string) (string, error) {
+func GenerateReport(filePath string, outputDir string) (string, error) {
 	var audio *mp3.Mp3
 	audio, err := audio.New(filePath)
 
@@ -43,7 +43,15 @@ func GenerateReport(filePath string) (string, error) {
 	overallRms := audio.GetOverallRMS()
 	rmsFloor := audio.GetRmsFloor()
 
-	f, err := os.Create("report.html")
+	var outfile string
+
+	if outputDir != "" {
+		outfile = outputDir
+	} else {
+		outfile = "report.html"
+	}
+
+	f, err := os.Create(outfile)
 
 	if err != nil {
 		return "", fmt.Errorf("Failed to create report file")
@@ -55,5 +63,5 @@ func GenerateReport(filePath string) (string, error) {
 		return "", fmt.Errorf("failed to write output file: %w", err)
 	}
 
-	return "report.html", nil
+	return outfile, nil
 }
