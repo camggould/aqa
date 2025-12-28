@@ -12,6 +12,10 @@ Clone the repo to start using aqa. Sample commands:
 - `aqa rmsCeiling --mp3 /path/to/my/mp3` returns the RMS ceiling of the audio file.
 - `aqa report --mp3 /path/to/my/mp3 --o my_output_file.html` generates an HTML report highlighting audio quality.
 
+## Example report
+
+<img width="839" height="203" alt="image" src="https://github.com/user-attachments/assets/ead3b603-1ef7-4879-ae9e-3c99ed2bb533" />
+
 ## Supported audio formats
 
 Currently the only supported audio format is MP3.
