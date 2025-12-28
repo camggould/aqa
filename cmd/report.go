@@ -15,20 +15,29 @@ var reportCmd = &cobra.Command{
 	Use: "report",
 	Short: "Generate an HTML report of audio quality for the provided MP3.",
 	Long: "Generate an HTML report of audio quality for the provided MP3. The first argument is the input MP3 file, and the second argument is an optional output file location for the report.",
-	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		reportPath, err := GenerateReport(args[0], args[1])
+		mp3File, err := cmd.Flags().GetString("mp3")
+
+		if err != nil {
+			fmt.Printf("Failed to read mp3 flag: %s\n", err)
+			return
+		}
+
+		outfile, err := cmd.Flags().GetString("o")
+		reportPath, err := GenerateReport(mp3File, outfile)
 
 		if err != nil {
 			fmt.Printf("Report could not be generated due to error: %s\n", err)
 			return
 		}
 
-		fmt.Printf("Report for file %s: can be found in %s.\n", args[0], reportPath)
+		fmt.Printf("Report for file %s: can be found in %s.\n", mp3File, reportPath)
 	},
 }
 
 func init() {
+	reportCmd.Flags().String("mp3", "example.mp3", "the mp3 file to analyze.")
+	reportCmd.Flags().String("o", "example.html", "the html file to output a report to. Default is 'report.html'.")
 	rootCmd.AddCommand(reportCmd)
 }
 
