@@ -68,10 +68,7 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
 }
 
 /** Calculates overall RMS
- * Overall RMS is calculated by sliding across 0.5s windows of the audio (0.1s hops)
- * and calculating the RMS of that window. The RMS is converted to decibles.
- * After sliding over all of the content, the decibles are averaged to get the RMS (in dB)
- * of the entire audio. Each window that is evaluated includes DC removal and Hann smoothing.
+ * Overall RMS is calculated by leveraging ffmpeg's volumedetect to find the mean volume.
 */
 func (mp3 *Mp3) GetOverallRMS() float64 {
 	return mp3.rms
@@ -125,7 +122,7 @@ func (mp3 *Mp3) GetRMSCeiling() float64 {
 }
 
 /* Returns peak level of audio.
- * This leverages ffmpeg max_volume to retrieve the peak.
+ * This leverages ffmpeg volumedetect's max_volume to retrieve the peak volume.
  */
 func (mp3 *Mp3) GetPeakDBFS() float64 {
 	return mp3.peak
