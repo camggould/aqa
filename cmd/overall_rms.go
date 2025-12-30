@@ -4,8 +4,14 @@ import (
 	"fmt"
 
 	"github.com/camggould/aqa/audio"
+	"github.com/camggould/aqa/utils"
 	"github.com/spf13/cobra"
 )
+
+type RmsResponse struct {
+	File string `json:"file"`
+	Rms string `json:"RMS"`
+}
 
 var rmsCmd = &cobra.Command{
 	Use: "rms",
@@ -19,12 +25,14 @@ var rmsCmd = &cobra.Command{
 
 func runRmsCommand(cmd *cobra.Command, args []string, audioFile string) string {
 	rms, err := GetOverallRMS(audioFile)
+	if err != nil { return fmt.Sprintf("RMS could not be calculated due to error: %s\n", err) }
 
-	if err != nil {
-		return fmt.Sprintf("RMS could not be calculated due to error: %s\n", err)
+	responseData := RmsResponse{
+		File: audioFile,
+		Rms: utils.PrintDb(rms),
 	}
 
-	return fmt.Sprintf("RMS for file %s: %fdB\n", audioFile, rms)
+	return utils.FormattedJsonOutput(responseData)
 }
 
 func init() {
