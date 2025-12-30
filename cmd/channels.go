@@ -17,10 +17,7 @@ var channelsCmd = &cobra.Command{
 	Use: "channels",
 	Short: "Get the number of channels for an audio file.",
 	Long: "Get the number of channels for a provided audio file. Must be a valid audio file.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleAudioAnalysis(cmd, args, runChannelsCommand))
-		return
-	},
+	Run: RunGenerator(runChannelsCommand),
 }
 
 func runChannelsCommand(cmd *cobra.Command, args []string, audioFile string) string {

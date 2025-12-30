@@ -12,10 +12,7 @@ var rmsCeilingCmd = &cobra.Command{
 	Use: "rmsCeiling",
 	Short: "Get the RMS ceiling of an audio file.",
 	Long: "Get the RMS ceiling of a provided audio file. Must be a valid audio file. Calculated based on the loudest 0.5s segment of audio.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleAudioAnalysis(cmd, args, runRmsCeilingCommand))
-		return
-	},
+	Run: RunGenerator(runRmsCeilingCommand),
 }
 
 func runRmsCeilingCommand(cmd *cobra.Command, args []string, audioFile string) string {

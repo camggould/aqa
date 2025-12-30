@@ -8,14 +8,14 @@ import (
 )
 
 type AudioOperation func(*cobra.Command, []string, string) string
+type AudioOperationHandler func(cmd *cobra.Command, args []string, operation AudioOperation)
+type RunFunction func(*cobra.Command, []string)
 
 var rootCmd = &cobra.Command{
 	Use: "aqa",
 	Short: "aqa is a cli tool for checking audio quality for professional voiceover.",
 	Long: "aqa is a cli tool for checking audio quality for professional voiceover. It checks RMS floor, RMS range, peak values, channel format, and CBR.",
-	Run: func(cmd *cobra.Command, args []string) {
-
-	},
+	Run: func(cmd *cobra.Command, args []string) {},
 }
 
 func Execute() {
@@ -25,12 +25,19 @@ func Execute() {
 	}
 }
 
-func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation AudioOperation) string {
+/** Generic helper for handling audio analysis commands.
+ * This helper takes in the audio operation to invoke and invokes it after doing basic validation on the required flag.
+*/
+func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation AudioOperation) {
 	audioFile, err := cmd.Flags().GetString("file")
 
 	if err != nil || audioFile == "" {
-		return fmt.Sprintf("Failed to read file flag: %s\n", err)
+		fmt.Sprintf("Failed to read file flag: %s\n", err)
 	}
 
-	return operation(cmd, args, audioFile)
+	fmt.Printf(operation(cmd, args, audioFile))
+}
+
+func RunGenerator(operation AudioOperation) RunFunction {
+	return func (cmd *cobra.Command, args []string) { HandleAudioAnalysis(cmd, args, operation) }
 }

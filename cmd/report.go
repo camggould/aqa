@@ -15,10 +15,7 @@ var reportCmd = &cobra.Command{
 	Use: "report",
 	Short: "Generate an HTML report of audio quality for the provided audio file.",
 	Long: "Generate an HTML report of audio quality for the provided audio file. The first argument is the input audio file, and the second argument is an optional output file location for the report.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleAudioAnalysis(cmd, args, runReportCmd))
-		return
-	},
+	Run: RunGenerator(runReportCmd),
 }
 
 func runReportCmd(cmd *cobra.Command, args []string, audioFile string) string {

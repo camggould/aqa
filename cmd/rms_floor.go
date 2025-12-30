@@ -12,10 +12,7 @@ var rmsFloorCmd = &cobra.Command{
 	Use: "rmsFloor",
 	Short: "Get the RMS floor of an audio file.",
 	Long: "Get the RMS floor of a provided audio file. Must be a valid audio file. Calculated based on the quietest 0.5s segment of audio.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleAudioAnalysis(cmd, args, runRmsFloorCommand))
-		return
-	},
+	Run: RunGenerator(runRmsFloorCommand),
 }
 
 func runRmsFloorCommand(cmd *cobra.Command, args []string, audioFile string) string {

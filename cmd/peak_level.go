@@ -18,10 +18,7 @@ var peakLevelCmd = &cobra.Command{
 	Use: "peak",
 	Short: "Get the peak level of an audio file.",
 	Long: "Get the peak level of a provided mp3 file. Must be a valid audio file.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleAudioAnalysis(cmd, args, runPeakLevelCommand))
-		return
-	},
+	Run: RunGenerator(runPeakLevelCommand),
 }
 
 func runPeakLevelCommand(cmd *cobra.Command, args []string, audioFile string) string {

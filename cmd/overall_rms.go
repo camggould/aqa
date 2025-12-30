@@ -17,10 +17,7 @@ var rmsCmd = &cobra.Command{
 	Use: "rms",
 	Short: "Get the RMS of an audio file.",
 	Long: "Get the RMS of a provided audio file. Must be a valid audio file.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleAudioAnalysis(cmd, args, runRmsCommand))
-		return
-	},
+	Run: RunGenerator(runRmsCommand),
 }
 
 func runRmsCommand(cmd *cobra.Command, args []string, audioFile string) string {
