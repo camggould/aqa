@@ -29,7 +29,7 @@ func init() {
 	rootCmd.PersistentFlags().String("mp3", "", "the mp3 file to analyze.")
 }
 
-func HandleMp3Analysis(cmd *cobra.Command, args []string, operation Mp3Operation) string {
+func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation Mp3Operation) string {
 	mp3File, err := cmd.Flags().GetString("mp3")
 
 	if err != nil || mp3File == "" {

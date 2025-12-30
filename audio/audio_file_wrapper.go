@@ -1,4 +1,4 @@
-package mp3
+package audio
 
 import (
 	"bytes"
@@ -10,13 +10,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/camggould/aqa/validation"
-
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	ffprobe "gopkg.in/vansante/go-ffprobe.v2"
 )
 
-type Mp3 struct {
+type AudioFile struct {
 	filePath string
 	samples []float64
 	sampleRate int
@@ -26,16 +24,11 @@ type Mp3 struct {
 
 const HANN_RMS = 0.6123724356957945
 
-func (*Mp3) New(filePath string) (*Mp3, error) {
-	err := validation.IsMP3(filePath)
-	if err != nil {
-		return nil, err
-	}
-
+func (*AudioFile) New(filePath string) (*AudioFile, error) {
 	sampleRate, err := detectSampleRate(filePath)
 
 	if err != nil {
-		return nil, fmt.Errorf("No sample rate detected for provided mp3 file %s. %w", filePath, err)
+		return nil, fmt.Errorf("No sample rate detected for provided audio file %s. %w", filePath, err)
 	}
 
 	samples, err := decodeToPCM(filePath, sampleRate)
@@ -56,7 +49,7 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
 		return nil, fmt.Errorf("Unable to parse rms or peak for file [%s]. %w", filePath, err)
 	}
 
-	mp3 := Mp3 {
+	audioFile := AudioFile {
 		filePath: filePath,
 		samples: samples,
 		sampleRate: sampleRateAsInt,
@@ -64,14 +57,14 @@ func (*Mp3) New(filePath string) (*Mp3, error) {
 		peak: peak,
 	}
 
-	return &mp3, nil
+	return &audioFile, nil
 }
 
 /** Calculates overall RMS
  * Overall RMS is calculated by leveraging ffmpeg's volumedetect to find the mean volume.
 */
-func (mp3 *Mp3) GetOverallRMS() float64 {
-	return mp3.rms
+func (audioFile *AudioFile) GetOverallRMS() float64 {
+	return audioFile.rms
 }
 
 /** Calculates RMS floor
@@ -79,13 +72,13 @@ func (mp3 *Mp3) GetOverallRMS() float64 {
  * and calculating the RMS of that window. The minimum RMS window is tracked and converted
  * to decibles at the end. Each window that is evaluated includes DC removal and Hann smoothing.
 */
-func (mp3 *Mp3) GetRmsFloor() float64 {
-	frameSize := int(0.5 * float64(mp3.sampleRate))
-	hopSize := int(0.01 * float64(mp3.sampleRate))
+func (audioFile *AudioFile) GetRmsFloor() float64 {
+	frameSize := int(0.5 * float64(audioFile.sampleRate))
+	hopSize := int(0.01 * float64(audioFile.sampleRate))
 
 	minRMS := math.Inf(1)
-	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
-		windowed := applyHannWindow(mp3.samples[i : i+frameSize])
+	for i := 0; i+frameSize <= len(audioFile.samples); i += hopSize {
+		windowed := applyHannWindow(audioFile.samples[i : i+frameSize])
 		rms := rmsFrame(windowed)
 		if rms < minRMS {
 			minRMS = rms
@@ -100,15 +93,15 @@ func (mp3 *Mp3) GetRmsFloor() float64 {
  * and calculating the RMS of that window. The maximum RMS window is tracked and converted
  * to decibles at the end. Each window that is evaluated includes DC removal and Hann smoothing.
 */
-func (mp3 *Mp3) GetRMSCeiling() float64 {
-	frameSize := int(0.5 * float64(mp3.sampleRate))
-	hopSize := int(0.01 * float64(mp3.sampleRate))
+func (audioFile *AudioFile) GetRMSCeiling() float64 {
+	frameSize := int(0.5 * float64(audioFile.sampleRate))
+	hopSize := int(0.01 * float64(audioFile.sampleRate))
 
 	maxRMS := math.Inf(-1)
 
-	for i := 0; i+frameSize <= len(mp3.samples); i += hopSize {
+	for i := 0; i+frameSize <= len(audioFile.samples); i += hopSize {
 		frame := make([]float64, frameSize)
-		copy(frame, mp3.samples[i:i+frameSize])
+		copy(frame, audioFile.samples[i:i+frameSize])
 
 		windowed := applyHannWindow(frame)
 		rms := rmsFrame(windowed)
@@ -124,8 +117,8 @@ func (mp3 *Mp3) GetRMSCeiling() float64 {
 /* Returns peak level of audio.
  * This leverages ffmpeg volumedetect's max_volume to retrieve the peak volume.
  */
-func (mp3 *Mp3) GetPeakDBFS() float64 {
-	return mp3.peak
+func (audioFile *AudioFile) GetPeakDBFS() float64 {
+	return audioFile.peak
 }
 
 func applyHannWindow(samples []float64) []float64 {

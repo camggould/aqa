@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/camggould/aqa/mp3"
+	"github.com/camggould/aqa/audio"
 	"github.com/camggould/aqa/templates"
 
 	"github.com/spf13/cobra"
@@ -13,23 +13,23 @@ import (
 
 var reportCmd = &cobra.Command{
 	Use: "report",
-	Short: "Generate an HTML report of audio quality for the provided MP3.",
-	Long: "Generate an HTML report of audio quality for the provided MP3. The first argument is the input MP3 file, and the second argument is an optional output file location for the report.",
+	Short: "Generate an HTML report of audio quality for the provided audio file.",
+	Long: "Generate an HTML report of audio quality for the provided audio file. The first argument is the input audio file, and the second argument is an optional output file location for the report.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(HandleMp3Analysis(cmd, args, runReportCmd))
+		fmt.Printf(HandleAudioAnalysis(cmd, args, runReportCmd))
 		return
 	},
 }
 
-func runReportCmd(cmd *cobra.Command, args []string, mp3File string) string {
+func runReportCmd(cmd *cobra.Command, args []string, audioFile string) string {
 	outfile, err := cmd.Flags().GetString("o")
-	reportPath, err := GenerateReport(mp3File, outfile)
+	reportPath, err := GenerateReport(audioFile, outfile)
 
 	if err != nil {
 		return fmt.Sprintf("Report could not be generated due to error: %s\n", err)
 	}
 
-	return fmt.Sprintf("Report for file %s: can be found in %s.\n", mp3File, reportPath)
+	return fmt.Sprintf("Report for file %s: can be found in %s.\n", audioFile, reportPath)
 }
 
 func init() {
@@ -38,7 +38,7 @@ func init() {
 }
 
 func GenerateReport(filePath string, outputDir string) (string, error) {
-	var audio *mp3.Mp3
+	var audio *audio.AudioFile
 	audio, err := audio.New(filePath)
 
 	if err != nil {
