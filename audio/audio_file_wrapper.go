@@ -65,6 +65,13 @@ func (audioFile *AudioFile) GetOverallRMS() float64 {
 	return audioFile.rms
 }
 
+/** Get the number of channels in an audio file.
+ * The number of channels is retrieved from the audio stream using ffprobe.
+*/
+func (audioFile *AudioFile) GetChannelCount() int {
+	return audioFile.metadata.Channels
+}
+
 /** Calculates RMS floor
  * RMS floor is calculated by sliding across 0.5s windows of the audio (0.1s hops)
  * and calculating the RMS of that window. The minimum RMS window is tracked and converted
