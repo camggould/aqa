@@ -25,21 +25,15 @@ type AudioFile struct {
 const HANN_RMS = 0.6123724356957945
 
 func (*AudioFile) New(filePath string) (*AudioFile, error) {
-	sampleRate, err := detectSampleRate(filePath)
+	var audioMetadata *AudioMetadata
+	audioMetadata, err := audioMetadata.New(filePath)
+	if err != nil { return nil, err }
 
-	if err != nil {
-		return nil, fmt.Errorf("No sample rate detected for provided audio file %s. %w", filePath, err)
-	}
-
-	samples, err := decodeToPCM(filePath, sampleRate)
+	samples, err := decodeToPCM(filePath, audioMetadata.SampleRate)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to collect samples for file %s. %w", filePath, err)
 	}
-
-	var audioMetadata *AudioMetadata
-	audioMetadata, err = audioMetadata.New(filePath)
-	if err != nil { return nil, err }
 
 	rms, peak, err := parseAudioLevels(filePath)
 
@@ -174,7 +168,7 @@ func detectSampleRate(path string) (string, error) {
 	return "", fmt.Errorf("no audio stream found")
 }
 
-func decodeToPCM(filePath string, sampleRate string) ([]float64, error) {
+func decodeToPCM(filePath string, sampleRate int) ([]float64, error) {
 	cmd := ffmpeg.Input(filePath).
 		Output("pipe:", ffmpeg.KwArgs{
 			"format": "f32le",

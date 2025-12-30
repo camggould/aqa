@@ -7,7 +7,7 @@ func init() {
 
 func configureFlags() {
 	rootCmd.PersistentFlags().String("file", "", "the audio file to analyze.")
-	reportCmd.Flags().String("o", "example.html", "the html file to output a report to. Default is 'report.html'.")
+	reportCmd.Flags().String("o", "", "the html file to output a report to. Default is 'report.html'.")
 }
 
 /* Configures enabled commands.

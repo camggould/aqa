@@ -7,9 +7,17 @@ import (
 
 	"github.com/camggould/aqa/audio"
 	"github.com/camggould/aqa/templates"
+	"github.com/camggould/aqa/utils"
+
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
+
+type ReportResponse struct {
+	File string `json:"file"`
+	OutputDirectory string `json:"outputDir"`
+}
 
 var reportCmd = &cobra.Command{
 	Use: "report",
@@ -26,7 +34,12 @@ func runReportCmd(cmd *cobra.Command, args []string, audioFile string) string {
 		return fmt.Sprintf("Report could not be generated due to error: %s\n", err)
 	}
 
-	return fmt.Sprintf("Report for file %s: can be found in %s.\n", audioFile, reportPath)
+	responseData := ReportResponse{
+		File: audioFile,
+		OutputDirectory: reportPath,
+	}
+
+	return utils.FormattedJsonOutput(responseData)
 }
 
 func GenerateReport(filePath string, outputDir string) (string, error) {
@@ -49,11 +62,14 @@ func GenerateReport(filePath string, outputDir string) (string, error) {
 		outfile = "report.html"
 	}
 
+	fullPath := filepath.Dir(outfile)
+	if err := os.MkdirAll(fullPath, 0755); err != nil {
+		return "", err
+	}
+
 	f, err := os.Create(outfile)
 
-	if err != nil {
-		return "", fmt.Errorf("Failed to create report file")
-	}
+	if err != nil { return "", err }
 
 	err = templates.Report(filePath, overallRms, rmsFloor, peakLevel).Render(context.Background(), f)
 
