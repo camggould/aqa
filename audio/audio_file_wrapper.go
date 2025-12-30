@@ -17,7 +17,7 @@ import (
 type AudioFile struct {
 	filePath string
 	samples []float64
-	sampleRate int
+	metadata *AudioMetadata
 	rms float64
 	peak float64
 }
@@ -37,11 +37,9 @@ func (*AudioFile) New(filePath string) (*AudioFile, error) {
 		return nil, fmt.Errorf("Failed to collect samples for file %s. %w", filePath, err)
 	}
 
-	sampleRateAsInt, err := parseSampleRate(sampleRate)
-
-	if err != nil {
-		return nil, fmt.Errorf("Unable to parse sample rate [%s]. %w", sampleRate, err)
-	}
+	var audioMetadata *AudioMetadata
+	audioMetadata, err = audioMetadata.New(filePath)
+	if err != nil { return nil, err }
 
 	rms, peak, err := parseAudioLevels(filePath)
 
@@ -52,7 +50,7 @@ func (*AudioFile) New(filePath string) (*AudioFile, error) {
 	audioFile := AudioFile {
 		filePath: filePath,
 		samples: samples,
-		sampleRate: sampleRateAsInt,
+		metadata: audioMetadata,
 		rms: rms,
 		peak: peak,
 	}
@@ -73,8 +71,8 @@ func (audioFile *AudioFile) GetOverallRMS() float64 {
  * to decibles at the end. Each window that is evaluated includes DC removal and Hann smoothing.
 */
 func (audioFile *AudioFile) GetRmsFloor() float64 {
-	frameSize := int(0.5 * float64(audioFile.sampleRate))
-	hopSize := int(0.01 * float64(audioFile.sampleRate))
+	frameSize := int(0.5 * float64(audioFile.metadata.SampleRate))
+	hopSize := int(0.01 * float64(audioFile.metadata.SampleRate))
 
 	minRMS := math.Inf(1)
 	for i := 0; i+frameSize <= len(audioFile.samples); i += hopSize {
@@ -94,8 +92,8 @@ func (audioFile *AudioFile) GetRmsFloor() float64 {
  * to decibles at the end. Each window that is evaluated includes DC removal and Hann smoothing.
 */
 func (audioFile *AudioFile) GetRMSCeiling() float64 {
-	frameSize := int(0.5 * float64(audioFile.sampleRate))
-	hopSize := int(0.01 * float64(audioFile.sampleRate))
+	frameSize := int(0.5 * float64(audioFile.metadata.SampleRate))
+	hopSize := int(0.01 * float64(audioFile.metadata.SampleRate))
 
 	maxRMS := math.Inf(-1)
 
@@ -197,23 +195,6 @@ func decodeToPCM(filePath string, sampleRate string) ([]float64, error) {
 	}
 
 	return samples, nil
-}
-
-func parseSampleRate(sr string) (int, error) {
-	if sr == "" {
-		return 0, fmt.Errorf("empty sample rate")
-	}
-
-	value, err := strconv.Atoi(sr)
-	if err != nil {
-		return 0, fmt.Errorf("invalid sample rate %q: %w", sr, err)
-	}
-
-	if value < 8000 || value > 384000 {
-		return 0, fmt.Errorf("unreasonable sample rate: %d", value)
-	}
-
-	return value, nil
 }
 
 func parseAudioLevels(filePath string) (meanDB float64, maxDB float64, err error) {
