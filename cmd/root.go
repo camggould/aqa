@@ -38,6 +38,11 @@ func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation AudioOpera
 	fmt.Printf(operation(cmd, args, audioFile))
 }
 
+/** Generic helper for generating run functions.
+ * This helper makes syntax for creating "Run" cobra functions simple by only requiring RunGenerator(func)
+ * instead of repetitive use of `func (cmd *cobra.Command, args []string) { HandleAudioAnalysis(cmd, args, myOperation) }`
+ * for each new command being created.
+*/
 func RunGenerator(operation AudioOperation) RunFunction {
 	return func (cmd *cobra.Command, args []string) { HandleAudioAnalysis(cmd, args, operation) }
 }
