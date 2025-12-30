@@ -26,7 +26,17 @@ func Execute() {
 }
 
 func init() {
+	// Flag configuration
 	rootCmd.PersistentFlags().String("file", "", "the audio file to analyze.")
+	reportCmd.Flags().String("o", "example.html", "the html file to output a report to. Default is 'report.html'.")
+
+	// Commands configuration
+	rootCmd.AddCommand(channelsCmd)
+	rootCmd.AddCommand(rmsCmd)
+	rootCmd.AddCommand(peakLevelCmd)
+	rootCmd.AddCommand(reportCmd)
+	rootCmd.AddCommand(rmsCeilingCmd)
+	rootCmd.AddCommand(rmsFloorCmd)
 }
 
 func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation AudioOperation) string {

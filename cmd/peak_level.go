@@ -4,9 +4,15 @@ import (
 	"fmt"
 
 	"github.com/camggould/aqa/audio"
+	"github.com/camggould/aqa/utils"
 
 	"github.com/spf13/cobra"
 )
+
+type PeakResponse struct {
+	File string `json:"file"`
+	PeakLevel string `json:"peakLevel"`
+}
 
 var peakLevelCmd = &cobra.Command{
 	Use: "peak",
@@ -19,17 +25,18 @@ var peakLevelCmd = &cobra.Command{
 }
 
 func runPeakLevelCommand(cmd *cobra.Command, args []string, audioFile string) string {
-	rms, err := GetPeakLevel(audioFile)
+	peakLevel, err := GetPeakLevel(audioFile)
 
 	if err != nil {
 		return fmt.Sprintf("Peak level could not be calculated due to error: %s\n", err)
 	}
 
-	return fmt.Sprintf("Peak level for file %s: %fdB\n", audioFile, rms)
-}
+	responseData := PeakResponse{
+		File: audioFile,
+		PeakLevel: utils.PrintDb(peakLevel),
+	}
 
-func init() {
-	rootCmd.AddCommand(peakLevelCmd)
+	return utils.FormattedJsonOutput(responseData)
 }
 
 func GetPeakLevel(filePath string) (float64, error) {

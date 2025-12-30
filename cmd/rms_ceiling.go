@@ -28,10 +28,6 @@ func runRmsCeilingCommand(cmd *cobra.Command, args []string, audioFile string) s
 	return fmt.Sprintf("RMS ceiling for file %s: %fdB\n", audioFile, rmsFloor)
 }
 
-func init() {
-	rootCmd.AddCommand(rmsCeilingCmd)
-}
-
 func GetRmsCeiling(filePath string) (float64, error) {
 	var audio *audio.AudioFile
 

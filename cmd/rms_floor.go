@@ -28,10 +28,6 @@ func runRmsFloorCommand(cmd *cobra.Command, args []string, audioFile string) str
 	return fmt.Sprintf("RMS floor for file %s: %fdB\n", audioFile, rmsFloor)
 }
 
-func init() {
-	rootCmd.AddCommand(rmsFloorCmd)
-}
-
 func GetRmsFloor(filePath string) (float64, error) {
 	var audio *audio.AudioFile
 

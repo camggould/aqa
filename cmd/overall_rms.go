@@ -35,10 +35,6 @@ func runRmsCommand(cmd *cobra.Command, args []string, audioFile string) string {
 	return utils.FormattedJsonOutput(responseData)
 }
 
-func init() {
-	rootCmd.AddCommand(rmsCmd)
-}
-
 func GetOverallRMS(filePath string) (float64, error) {
 	var audio *audio.AudioFile
 

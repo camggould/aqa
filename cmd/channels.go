@@ -38,10 +38,6 @@ func runChannelsCommand(cmd *cobra.Command, args []string, audioFile string) str
 	return utils.FormattedJsonOutput(channelsResponse)
 }
 
-func init() {
-	rootCmd.AddCommand(channelsCmd)
-}
-
 func GetChannelCount(filePath string) (int, error) {
 	var audio *audio.AudioFile
 	audio, err := audio.New(filePath)

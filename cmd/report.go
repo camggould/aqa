@@ -32,11 +32,6 @@ func runReportCmd(cmd *cobra.Command, args []string, audioFile string) string {
 	return fmt.Sprintf("Report for file %s: can be found in %s.\n", audioFile, reportPath)
 }
 
-func init() {
-	reportCmd.Flags().String("o", "example.html", "the html file to output a report to. Default is 'report.html'.")
-	rootCmd.AddCommand(reportCmd)
-}
-
 func GenerateReport(filePath string, outputDir string) (string, error) {
 	var audio *audio.AudioFile
 	audio, err := audio.New(filePath)
