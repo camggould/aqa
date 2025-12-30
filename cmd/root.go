@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Mp3Operation func(*cobra.Command, []string, string) string
+type AudioOperation func(*cobra.Command, []string, string) string
 
 var rootCmd = &cobra.Command{
 	Use: "aqa",
@@ -26,15 +26,15 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().String("mp3", "", "the mp3 file to analyze.")
+	rootCmd.PersistentFlags().String("file", "", "the audio file to analyze.")
 }
 
-func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation Mp3Operation) string {
-	mp3File, err := cmd.Flags().GetString("mp3")
+func HandleAudioAnalysis(cmd *cobra.Command, args []string, operation AudioOperation) string {
+	audioFile, err := cmd.Flags().GetString("file")
 
-	if err != nil || mp3File == "" {
-		return fmt.Sprintf("Failed to read mp3 flag: %s\n", err)
+	if err != nil || audioFile == "" {
+		return fmt.Sprintf("Failed to read file flag: %s\n", err)
 	}
 
-	return operation(cmd, args, mp3File)
+	return operation(cmd, args, audioFile)
 }
