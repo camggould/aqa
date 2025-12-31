@@ -52,6 +52,12 @@ func (*AudioFile) New(filePath string) (*AudioFile, error) {
 	return &audioFile, nil
 }
 
+/** Gets the sample rate of the audio file.
+*/
+func (audioFile *AudioFile) GetSampleRate() int {
+	return audioFile.metadata.SampleRate
+}
+
 /** Calculates overall RMS
  * Overall RMS is calculated by leveraging ffmpeg's volumedetect to find the mean volume.
 */
