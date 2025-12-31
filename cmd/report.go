@@ -54,6 +54,7 @@ func GenerateReport(filePath string, outputDir string) (string, error) {
 	rmsFloor := audio.GetRmsFloor()
 	peakLevel := audio.GetPeakDBFS()
 	channels := audio.GetChannelCount()
+	sampleRate := audio.GetSampleRate()
 
 	var outfile string
 
@@ -72,7 +73,7 @@ func GenerateReport(filePath string, outputDir string) (string, error) {
 
 	if err != nil { return "", err }
 
-	err = templates.Report(filePath, overallRms, rmsFloor, peakLevel, channels).Render(context.Background(), f)
+	err = templates.Report(filePath, overallRms, rmsFloor, peakLevel, channels, sampleRate).Render(context.Background(), f)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to write output file: %w", err)

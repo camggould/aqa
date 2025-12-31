@@ -2,6 +2,7 @@ package templates
 
 import "fmt"
 import "math"
+import "github.com/camggould/aqa/utils"
 
 const RMS_BASELINE float64 = -20.5
 const RMS_FLOOR float64 = -60.0
@@ -9,13 +10,14 @@ const RMS_MIN float64 = RMS_BASELINE - 2.5
 const RMS_MAX float64 = RMS_BASELINE + 2.5
 const PEAK_LEVEL float64 = -3.0
 
-templ Report(filePath string, rms float64, rmsFloor float64, peakLevel float64, channels int) {
+templ Report(filePath string, rms float64, rmsFloor float64, peakLevel float64, channels int, sampleRate int) {
 	<div>
         <h2>Report for file {filePath}</h2>
         <h3>Statistics</h3>
-        <p>
-            <b>Channels:&nbsp;</b> {channels}
-        </p>
+        <ul>
+            <li><b>Channels:&nbsp;</b> {channels}</li>
+            <li><b>Sample Rate:&nbsp;</b> {utils.PrintSampleRate(sampleRate)}</li>
+        </ul>
         <table>
             <th style={cellStyle("left", "150px")}>Field</th>
             <th style={cellStyle("left", "120px")}>Value</th>
