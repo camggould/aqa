@@ -4,9 +4,15 @@ import (
 	"fmt"
 
 	"github.com/camggould/aqa/audio"
+	"github.com/camggould/aqa/utils"
 
 	"github.com/spf13/cobra"
 )
+
+type RmsFloorResponse struct {
+	File string `json:"file"`
+	RmsFloor string `json:"rmsFloor"`
+}
 
 var rmsFloorCmd = &cobra.Command{
 	Use: "rmsFloor",
@@ -22,7 +28,12 @@ func runRmsFloorCommand(cmd *cobra.Command, args []string, audioFile string) str
 		return fmt.Sprintf("RMS floor could not be calculated due to error: %s\n", err)
 	}
 
-	return fmt.Sprintf("RMS floor for file %s: %fdB\n", audioFile, rmsFloor)
+	responseData := RmsFloorResponse{
+		File: audioFile,
+		RmsFloor: utils.PrintDb(rmsFloor),
+	}
+
+	return utils.FormattedJsonOutput(responseData)
 }
 
 func GetRmsFloor(filePath string) (float64, error) {
