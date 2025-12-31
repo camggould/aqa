@@ -20,4 +20,5 @@ func configureCommands() {
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(rmsCeilingCmd)
 	rootCmd.AddCommand(rmsFloorCmd)
+	rootCmd.AddCommand(sampleRateCmd)
 }
