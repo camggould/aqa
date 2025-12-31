@@ -17,7 +17,7 @@ Clone the repo to start using aqa. Sample commands:
 
 ## Example report
 
-<img width="839" height="203" alt="image" src="https://github.com/user-attachments/assets/ead3b603-1ef7-4879-ae9e-3c99ed2bb533" />
+<img width="750" height="322" alt="image" src="https://github.com/user-attachments/assets/e12b4d0e-9346-40b9-8764-983c59f8a1a0" />
 
 ## Supported audio formats
 
