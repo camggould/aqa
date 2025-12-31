@@ -4,9 +4,15 @@ import (
 	"fmt"
 
 	"github.com/camggould/aqa/audio"
+	"github.com/camggould/aqa/utils"
 
 	"github.com/spf13/cobra"
 )
+
+type RmsCeilingResponse struct {
+	File string `json:"file"`
+	RmsCeiling string `json:"rmsCeiling"`
+}
 
 var rmsCeilingCmd = &cobra.Command{
 	Use: "rmsCeiling",
@@ -16,13 +22,18 @@ var rmsCeilingCmd = &cobra.Command{
 }
 
 func runRmsCeilingCommand(cmd *cobra.Command, args []string, audioFile string) string {
-	rmsFloor, err := GetRmsCeiling(audioFile)
+	rmsCeiling, err := GetRmsCeiling(audioFile)
 
 	if err != nil {
 		return fmt.Sprintf("RMS ceiling could not be calculated due to error: %s\n", err)
 	}
 
-	return fmt.Sprintf("RMS ceiling for file %s: %fdB\n", audioFile, rmsFloor)
+	responseData := RmsCeilingResponse{
+		File: audioFile,
+		RmsCeiling: utils.PrintDb(rmsCeiling),
+	}
+
+	return utils.FormattedJsonOutput(responseData)
 }
 
 func GetRmsCeiling(filePath string) (float64, error) {
