@@ -11,6 +11,7 @@ Clone the repo to start using aqa. Sample commands:
 - `aqa rmsFloor --file /path/to/my/audio.mp3` returns the RMS floor of the audio file.
 - `aqa rmsCeiling --file /path/to/my/audio.flac` returns the RMS ceiling of the audio file.
 - `aqa channels --file /path/to/my/audio.flac` returns the number of channels in the audio file.
+- `aqa sampleRate --file /path/to/my/audio.flac` returns the sample rate of the audio file.
 - `aqa report --file /path/to/my/audio.aac --o my_output_file.html` generates an HTML report highlighting audio quality.
   - The `--o` flag also supports directories.
 
