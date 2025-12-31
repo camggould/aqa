@@ -9,9 +9,13 @@ const RMS_MIN float64 = RMS_BASELINE - 2.5
 const RMS_MAX float64 = RMS_BASELINE + 2.5
 const PEAK_LEVEL float64 = -3.0
 
-templ Report(filePath string, rms float64, rmsFloor float64, peakLevel float64) {
+templ Report(filePath string, rms float64, rmsFloor float64, peakLevel float64, channels int) {
 	<div>
         <h2>Report for file {filePath}</h2>
+        <h3>Statistics</h3>
+        <p>
+            <b>Channels:&nbsp;</b> {channels}
+        </p>
         <table>
             <th style={cellStyle("left", "150px")}>Field</th>
             <th style={cellStyle("left", "120px")}>Value</th>
